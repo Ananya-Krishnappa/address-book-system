@@ -159,4 +159,28 @@ public class AddressBookRepository {
 		}
 		return contactList;
 	}
+
+	/**
+	 * Function to search by city
+	 * 
+	 * @param city
+	 * @return List<Contact>
+	 * @throws AddressBookException
+	 */
+	public List<Contact> searchPersonByCity(String city) throws AddressBookException {
+		try (Connection connection = JdbcConnectionFactory.getJdbcConnection()) {
+			String query = "select * from contact WHERE city = ?";
+			PreparedStatement preparedStatement = connection.prepareStatement(query);
+			preparedStatement.setString(1, city);
+			ResultSet rs = preparedStatement.executeQuery();
+			List<Contact> contactList = mapResultSetToContactList(rs);
+			return contactList;
+		} catch (SQLException e) {
+			LOG.error("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+			throw new AddressBookException("SQL State: " + e.getSQLState() + " " + e.getMessage());
+		} catch (Exception e) {
+			throw new AddressBookException(e.getMessage());
+		}
+	}
+
 }

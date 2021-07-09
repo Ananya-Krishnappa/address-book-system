@@ -143,4 +143,16 @@ public class AddressBookServiceTest {
 		String actualMessage = exception.getMessage();
 		assertTrue(actualMessage.contains(expectedMessage));
 	}
+
+	@Test
+	public void givenAddressBook_whenSearchByCity_shouldReturnValidResultFromAddressBook() throws AddressBookException {
+		List<Contact> result = addressBookService.searchPersonByCity("Banglore");
+		assertTrue(result.size() > 0);
+	}
+
+	@Test
+	public void givenAddressBook_whenSearchByNonExistentCity_shouldReturnEmptyList() throws AddressBookException {
+		List<Contact> result = addressBookService.searchPersonByCity("koppa");
+		assertTrue(result.isEmpty());
+	}
 }

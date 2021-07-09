@@ -11,4 +11,6 @@ public interface IAddressBookService {
 	public int deleteContactByName(String name) throws AddressBookException;
 
 	public List<Contact> addMultipleContactsToAddressBook(List<Contact> contactList) throws AddressBookException;
+
+	public List<Contact> searchPersonByCity(String city) throws AddressBookException;
 }
