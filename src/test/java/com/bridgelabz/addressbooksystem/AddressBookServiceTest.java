@@ -1,6 +1,7 @@
 package com.bridgelabz.addressbooksystem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.SQLException;
@@ -74,9 +75,9 @@ public class AddressBookServiceTest {
 	public void givenMultipleContacts_whenCalledCreateContactInAddressBook_shouldDoBatchInserts()
 			throws AddressBookException, JdbcConnectorException, SQLException {
 		List<Contact> contactList = new ArrayList<Contact>();
-		Contact contact = createContact("goa", "Gurgoan", "983635242", "qwe@123.gmail.com", "Rocky", "Hari",
+		Contact contact = createContact(1, "goa", "Gurgoan", "983635242", "qwe@123.gmail.com", "Rocky", "Hari",
 				"Karnataka", "1267");
-		Contact contact1 = createContact("uyrg", "kerala", "9836399242", "kjhg@123.gmail.com", "Warner", "Kay",
+		Contact contact1 = createContact(1, "uyrg", "kerala", "9836399242", "kjhg@123.gmail.com", "Warner", "Kay",
 				"Kerala", "127");
 		contactList.add(contact);
 		contactList.add(contact1);
@@ -104,9 +105,10 @@ public class AddressBookServiceTest {
 	 * @param zip
 	 * @return Contact
 	 */
-	private Contact createContact(String address, String city, String phoneNum, String email, String firstName,
-			String lastName, String state, String zip) {
+	private Contact createContact(int addressBookId, String address, String city, String phoneNum, String email,
+			String firstName, String lastName, String state, String zip) {
 		Contact contact = new Contact();
+		contact.setAddressBookId(addressBookId);
 		contact.setAddress(address);
 		contact.setCity(city);
 		contact.setEmail(email);
@@ -128,5 +130,17 @@ public class AddressBookServiceTest {
 	private Contact setIdToContact(Contact contact, AtomicInteger index) {
 		contact.setId(index.getAndIncrement());
 		return contact;
+	}
+
+	@Test
+	public void givenAContact_whenCalledAdd_shouldMakeDuplicateNameCheckBeforeAdding() throws AddressBookException {
+		Contact contact = createContact(1, "goa", "Gurgoan", "983635242", "qwe@123.gmail.com", "Rocky", "Hari",
+				"Karnataka", "1267");
+		Exception exception = assertThrows(AddressBookException.class, () -> {
+			addressBookService.addContactToAddressBook(contact);
+		});
+		String expectedMessage = "Duplicate entry 'Rocky-Hari' for key 'contact.unique_name'";
+		String actualMessage = exception.getMessage();
+		assertTrue(actualMessage.contains(expectedMessage));
 	}
 }

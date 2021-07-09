@@ -40,23 +40,23 @@ public class AddressBookRepository {
 	 * @throws AddressBookException
 	 */
 	public Contact addContactToAddressBook(Contact contact) throws AddressBookException {
-		int addressBookId = -1;
+		int contactId = -1;
 		try (Connection connection = JdbcConnectionFactory.getJdbcConnection()) {
 			String query = String.format(
-					"insert into contact(first_name,last_name,address,city,state,zip,phone_num,email) "
-							+ "values('%s','%s','%s','%s','%s','%s','%s','%s',%s)",
-					contact.getFirstName(), contact.getLastName(), contact.getAddress(), contact.getCity(),
-					contact.getState(), contact.getZip(), contact.getPhoneNumber(), contact.getEmail(),
-					contact.getAddressBookId());
+					"insert into contact(addressbook_id,first_name,last_name,address,city,state,zip,phone_num,email) "
+							+ "values('%d','%s','%s','%s','%s','%s','%s','%s','%s')",
+					contact.getAddressBookId(), contact.getFirstName(), contact.getLastName(), contact.getAddress(),
+					contact.getCity(), contact.getState(), contact.getZip(), contact.getPhoneNumber(),
+					contact.getEmail());
 			Statement statement = connection.createStatement();
 			int rowAffected = statement.executeUpdate(query, statement.RETURN_GENERATED_KEYS);
 			if (rowAffected == 1) {
 				ResultSet result = statement.getGeneratedKeys();
 				if (result.next()) {
-					addressBookId = result.getInt(1);
+					contactId = result.getInt(1);
 				}
 			}
-			contact.setId(addressBookId);
+			contact.setId(contactId);
 			return contact;
 		} catch (Exception e) {
 			throw new AddressBookException(e.getMessage());
@@ -100,17 +100,18 @@ public class AddressBookRepository {
 		try {
 			connection.setAutoCommit(false);
 			PreparedStatement pstmt = connection.prepareStatement(
-					"insert into contact(first_name,last_name,address,city,state,zip,phone_num,email) "
-							+ "values(?,?,?,?,?,?,?,?)");
+					"insert into contact(addressbook_id,first_name,last_name,address,city,state,zip,phone_num,email) "
+							+ "values(?,?,?,?,?,?,?,?,?)");
 			for (int i = 0; i < contactList.size(); i++) {
-				pstmt.setString(1, contactList.get(i).getFirstName());
-				pstmt.setString(2, contactList.get(i).getLastName());
-				pstmt.setString(3, contactList.get(i).getAddress());
-				pstmt.setString(4, contactList.get(i).getCity());
-				pstmt.setString(5, contactList.get(i).getState());
-				pstmt.setString(6, contactList.get(i).getZip());
-				pstmt.setString(7, contactList.get(i).getPhoneNumber());
-				pstmt.setString(8, contactList.get(i).getEmail());
+				pstmt.setInt(1, contactList.get(i).getAddressBookId());
+				pstmt.setString(2, contactList.get(i).getFirstName());
+				pstmt.setString(3, contactList.get(i).getLastName());
+				pstmt.setString(4, contactList.get(i).getAddress());
+				pstmt.setString(5, contactList.get(i).getCity());
+				pstmt.setString(6, contactList.get(i).getState());
+				pstmt.setString(7, contactList.get(i).getZip());
+				pstmt.setString(8, contactList.get(i).getPhoneNumber());
+				pstmt.setString(9, contactList.get(i).getEmail());
 				pstmt.addBatch();
 			}
 			try {
@@ -145,6 +146,7 @@ public class AddressBookRepository {
 		while (rs.next()) {
 			Contact contact = new Contact();
 			contact.setId(rs.getInt("id"));
+			contact.setAddressBookId(rs.getInt("addressbook_id"));
 			contact.setAddress(rs.getString("address"));
 			contact.setCity(rs.getString("city"));
 			contact.setEmail(rs.getString("email"));
