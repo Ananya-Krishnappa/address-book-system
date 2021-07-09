@@ -1,7 +1,8 @@
 package com.bridgelabz.addressbooksystem.dto;
 
-public class AddressBook {
+public class Contact {
 	int id;
+	int addressBookId;
 	String firstName;
 	String lastName;
 	String address;
@@ -11,14 +12,15 @@ public class AddressBook {
 	String phoneNumber;
 	String email;
 
-	public AddressBook() {
+	public Contact() {
 
 	}
 
-	public AddressBook(int id, String firstName, String lastName, String address, String city, String state, String zip,
-			String phoneNumber, String email) {
+	public Contact(int id, int addressBookId, String firstName, String lastName, String address, String city,
+			String state, String zip, String phoneNumber, String email) {
 		super();
 		this.id = id;
+		this.addressBookId = addressBookId;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.address = address;
@@ -27,6 +29,14 @@ public class AddressBook {
 		this.zip = zip;
 		this.phoneNumber = phoneNumber;
 		this.email = email;
+	}
+
+	public int getAddressBookId() {
+		return addressBookId;
+	}
+
+	public void setAddressBookId(int addressBookId) {
+		this.addressBookId = addressBookId;
 	}
 
 	public String getEmail() {
@@ -103,8 +113,9 @@ public class AddressBook {
 
 	@Override
 	public String toString() {
-		return "AddressBook [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", address=" + address
-				+ ", city=" + city + ", state=" + state + ", zip=" + zip + ", phoneNumber=" + phoneNumber + ", email="
-				+ email + "]";
+		return "Contact [id=" + id + ", addressBookId=" + addressBookId + ", firstName=" + firstName + ", lastName="
+				+ lastName + ", address=" + address + ", city=" + city + ", state=" + state + ", zip=" + zip
+				+ ", phoneNumber=" + phoneNumber + ", email=" + email + "]";
 	}
+
 }
