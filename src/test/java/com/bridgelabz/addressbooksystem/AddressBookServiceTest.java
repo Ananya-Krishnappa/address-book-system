@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,9 +54,10 @@ public class AddressBookServiceTest {
 		contact.setZip("123");
 		contact.setAddressBookId(1);
 		contact.setEmail("apc@123.com");
+		contact.setCreatedDate(LocalDate.now());
 		Contact newContact = new Contact(1, contact.getAddressBookId(), contact.getFirstName(), contact.getLastName(),
 				contact.getAddress(), contact.getCity(), contact.getState(), contact.getZip(), contact.getPhoneNumber(),
-				contact.getEmail());
+				contact.getEmail(), contact.getCreatedDate());
 		Mockito.when(mockAddressBookRepository.addContactToAddressBook(Mockito.any(Contact.class)))
 				.thenReturn(newContact);
 		Contact result = mockAddressBookService.addContactToAddressBook(contact);
@@ -76,9 +78,9 @@ public class AddressBookServiceTest {
 			throws AddressBookException, JdbcConnectorException, SQLException {
 		List<Contact> contactList = new ArrayList<Contact>();
 		Contact contact = createContact(1, "goa", "Gurgoan", "983635242", "qwe@123.gmail.com", "Rocky", "Hari",
-				"Karnataka", "1267");
+				"Karnataka", "1267", LocalDate.now());
 		Contact contact1 = createContact(1, "uyrg", "kerala", "9836399242", "kjhg@123.gmail.com", "Warner", "Kay",
-				"Kerala", "127");
+				"Kerala", "127", LocalDate.now());
 		contactList.add(contact);
 		contactList.add(contact1);
 
@@ -106,7 +108,7 @@ public class AddressBookServiceTest {
 	 * @return Contact
 	 */
 	private Contact createContact(int addressBookId, String address, String city, String phoneNum, String email,
-			String firstName, String lastName, String state, String zip) {
+			String firstName, String lastName, String state, String zip, LocalDate createdDate) {
 		Contact contact = new Contact();
 		contact.setAddressBookId(addressBookId);
 		contact.setAddress(address);
@@ -117,6 +119,7 @@ public class AddressBookServiceTest {
 		contact.setPhoneNumber(phoneNum);
 		contact.setState(state);
 		contact.setZip(zip);
+		contact.setCreatedDate(createdDate);
 		return contact;
 	}
 
@@ -135,7 +138,7 @@ public class AddressBookServiceTest {
 	@Test
 	public void givenAContact_whenCalledAdd_shouldMakeDuplicateNameCheckBeforeAdding() throws AddressBookException {
 		Contact contact = createContact(1, "goa", "Gurgoan", "983635242", "qwe@123.gmail.com", "Rocky", "Hari",
-				"Karnataka", "1267");
+				"Karnataka", "1267", LocalDate.now());
 		Exception exception = assertThrows(AddressBookException.class, () -> {
 			addressBookService.addContactToAddressBook(contact);
 		});
@@ -154,5 +157,12 @@ public class AddressBookServiceTest {
 	public void givenAddressBook_whenSearchByNonExistentCity_shouldReturnEmptyList() throws AddressBookException {
 		List<Contact> result = addressBookService.searchPersonByCity("koppa");
 		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	public void givenContactsInAddressBook_whenSearchByCreatedDateRange_shouldReturnValidResult()
+			throws AddressBookException {
+		List<Contact> result = addressBookService.searchByCreatedDate(LocalDate.of(2021, 1, 1), LocalDate.now());
+		assertTrue(result.size() == 5);
 	}
 }

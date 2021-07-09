@@ -1,10 +1,12 @@
 package com.bridgelabz.addressbooksystem.dao;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,11 +45,11 @@ public class AddressBookRepository {
 		int contactId = -1;
 		try (Connection connection = JdbcConnectionFactory.getJdbcConnection()) {
 			String query = String.format(
-					"insert into contact(addressbook_id,first_name,last_name,address,city,state,zip,phone_num,email) "
-							+ "values('%d','%s','%s','%s','%s','%s','%s','%s','%s')",
+					"insert into contact(addressbook_id,first_name,last_name,address,city,state,zip,phone_num,email,created_date) "
+							+ "values('%d','%s','%s','%s','%s','%s','%s','%s','%s','%s')",
 					contact.getAddressBookId(), contact.getFirstName(), contact.getLastName(), contact.getAddress(),
 					contact.getCity(), contact.getState(), contact.getZip(), contact.getPhoneNumber(),
-					contact.getEmail());
+					contact.getEmail(), contact.getCreatedDate());
 			Statement statement = connection.createStatement();
 			int rowAffected = statement.executeUpdate(query, statement.RETURN_GENERATED_KEYS);
 			if (rowAffected == 1) {
@@ -100,8 +102,8 @@ public class AddressBookRepository {
 		try {
 			connection.setAutoCommit(false);
 			PreparedStatement pstmt = connection.prepareStatement(
-					"insert into contact(addressbook_id,first_name,last_name,address,city,state,zip,phone_num,email) "
-							+ "values(?,?,?,?,?,?,?,?,?)");
+					"insert into contact(addressbook_id,first_name,last_name,address,city,state,zip,phone_num,email,created_date) "
+							+ "values(?,?,?,?,?,?,?,?,?,?)");
 			for (int i = 0; i < contactList.size(); i++) {
 				pstmt.setInt(1, contactList.get(i).getAddressBookId());
 				pstmt.setString(2, contactList.get(i).getFirstName());
@@ -112,6 +114,7 @@ public class AddressBookRepository {
 				pstmt.setString(7, contactList.get(i).getZip());
 				pstmt.setString(8, contactList.get(i).getPhoneNumber());
 				pstmt.setString(9, contactList.get(i).getEmail());
+				pstmt.setDate(10, Date.valueOf(contactList.get(i).getCreatedDate()));
 				pstmt.addBatch();
 			}
 			try {
@@ -155,6 +158,7 @@ public class AddressBookRepository {
 			contact.setPhoneNumber(rs.getString("phone_num"));
 			contact.setState(rs.getString("state"));
 			contact.setZip(rs.getString("zip"));
+			contact.setCreatedDate(rs.getDate("created_date").toLocalDate());
 			contactList.add(contact);
 		}
 		return contactList;
@@ -172,6 +176,31 @@ public class AddressBookRepository {
 			String query = "select * from contact WHERE city = ?";
 			PreparedStatement preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, city);
+			ResultSet rs = preparedStatement.executeQuery();
+			List<Contact> contactList = mapResultSetToContactList(rs);
+			return contactList;
+		} catch (SQLException e) {
+			LOG.error("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+			throw new AddressBookException("SQL State: " + e.getSQLState() + " " + e.getMessage());
+		} catch (Exception e) {
+			throw new AddressBookException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Function to search a person by created date
+	 * 
+	 * @param startDate
+	 * @param endDate
+	 * @return List<Contact>
+	 * @throws AddressBookException
+	 */
+	public List<Contact> searchByCreatedDate(LocalDate startDate, LocalDate endDate) throws AddressBookException {
+		try (Connection connection = JdbcConnectionFactory.getJdbcConnection()) {
+			String query = "select * from contact WHERE created_date between ? and ?";
+			PreparedStatement preparedStatement = connection.prepareStatement(query);
+			preparedStatement.setDate(1, Date.valueOf(startDate));
+			preparedStatement.setDate(2, Date.valueOf(endDate));
 			ResultSet rs = preparedStatement.executeQuery();
 			List<Contact> contactList = mapResultSetToContactList(rs);
 			return contactList;

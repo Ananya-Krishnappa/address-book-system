@@ -1,5 +1,7 @@
 package com.bridgelabz.addressbooksystem.dto;
 
+import java.time.LocalDate;
+
 public class Contact {
 	int id;
 	int addressBookId;
@@ -11,13 +13,14 @@ public class Contact {
 	String zip;
 	String phoneNumber;
 	String email;
+	LocalDate createdDate;
 
 	public Contact() {
 
 	}
 
 	public Contact(int id, int addressBookId, String firstName, String lastName, String address, String city,
-			String state, String zip, String phoneNumber, String email) {
+			String state, String zip, String phoneNumber, String email, LocalDate createdDate) {
 		super();
 		this.id = id;
 		this.addressBookId = addressBookId;
@@ -29,6 +32,15 @@ public class Contact {
 		this.zip = zip;
 		this.phoneNumber = phoneNumber;
 		this.email = email;
+		this.createdDate = createdDate;
+	}
+
+	public LocalDate getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setCreatedDate(LocalDate createdDate) {
+		this.createdDate = createdDate;
 	}
 
 	public int getAddressBookId() {
@@ -115,7 +127,6 @@ public class Contact {
 	public String toString() {
 		return "Contact [id=" + id + ", addressBookId=" + addressBookId + ", firstName=" + firstName + ", lastName="
 				+ lastName + ", address=" + address + ", city=" + city + ", state=" + state + ", zip=" + zip
-				+ ", phoneNumber=" + phoneNumber + ", email=" + email + "]";
+				+ ", phoneNumber=" + phoneNumber + ", email=" + email + ", createdDate=" + createdDate + "]";
 	}
-
 }

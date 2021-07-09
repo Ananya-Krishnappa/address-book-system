@@ -7,6 +7,7 @@
  */
 package com.bridgelabz.addressbooksystem.service.impl;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -75,6 +76,19 @@ public class AddressBookService implements IAddressBookService {
 	public List<Contact> searchPersonByCity(String city) throws AddressBookException {
 		try {
 			List<Contact> result = addressBookRepository.searchPersonByCity(city);
+			return result;
+		} catch (Exception e) {
+			throw new AddressBookException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Function to search person by created date
+	 */
+	@Override
+	public List<Contact> searchByCreatedDate(LocalDate startDate, LocalDate endDate) throws AddressBookException {
+		try {
+			List<Contact> result = addressBookRepository.searchByCreatedDate(startDate, endDate);
 			return result;
 		} catch (Exception e) {
 			throw new AddressBookException(e.getMessage());
