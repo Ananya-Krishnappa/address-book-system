@@ -1,7 +1,9 @@
 package com.bridgelabz.addressbooksystem.dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.apache.logging.log4j.LogManager;
@@ -38,7 +40,7 @@ public class AddressBookRepository {
 		int addressBookId = -1;
 		try (Connection connection = JdbcConnectionFactory.getJdbcConnection()) {
 			String query = String.format(
-					"insert into address_book(first_name,last_name,address,city,state,zip,phone_num,email) "
+					"insert into contact(first_name,last_name,address,city,state,zip,phone_num,email) "
 							+ "values('%s','%s','%s','%s','%s','%s','%s','%s',%s)",
 					contact.getFirstName(), contact.getLastName(), contact.getAddress(), contact.getCity(),
 					contact.getState(), contact.getZip(), contact.getPhoneNumber(), contact.getEmail(),
@@ -53,6 +55,28 @@ public class AddressBookRepository {
 			}
 			contact.setId(addressBookId);
 			return contact;
+		} catch (Exception e) {
+			throw new AddressBookException(e.getMessage());
+		}
+	}
+
+	/**
+	 * delete contact by name
+	 * 
+	 * @param name
+	 * @return int
+	 * @throws AddressBookException
+	 */
+	public int deleteContactByName(String name) throws AddressBookException {
+		try (Connection connection = JdbcConnectionFactory.getJdbcConnection()) {
+			String query = "delete from contact WHERE first_name = ?";
+			PreparedStatement preparedStatement = connection.prepareStatement(query);
+			preparedStatement.setString(1, name);
+			int resultSet = preparedStatement.executeUpdate();
+			return resultSet;
+		} catch (SQLException e) {
+			LOG.error("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+			throw new AddressBookException("SQL State: " + e.getSQLState() + " " + e.getMessage());
 		} catch (Exception e) {
 			throw new AddressBookException(e.getMessage());
 		}

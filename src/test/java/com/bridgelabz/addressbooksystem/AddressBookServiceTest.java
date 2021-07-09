@@ -11,7 +11,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.bridgelabz.addressbooksystem.dao.AddressBookRepository;
-import com.bridgelabz.addressbooksystem.dto.AddressBook;
+import com.bridgelabz.addressbooksystem.dto.Contact;
 import com.bridgelabz.addressbooksystem.exception.AddressBookException;
 import com.bridgelabz.addressbooksystem.service.impl.AddressBookService;
 
@@ -34,22 +34,31 @@ public class AddressBookServiceTest {
 
 	@Test
 	public void givenAContact_whenCalledAdd_shouldCreateContactInAddressBook() throws AddressBookException {
-		AddressBook addressBook = new AddressBook();
-		addressBook.setFirstName("leo");
-		addressBook.setLastName("Jack");
-		addressBook.setAddress("qatar");
-		addressBook.setCity("jaipur");
-		addressBook.setPhoneNumber("09877654");
-		addressBook.setState("rajasthan");
-		addressBook.setZip("123");
-		addressBook.setEmail("apc@123.com");
-		AddressBook newAddressBook = new AddressBook(1, addressBook.getFirstName(), addressBook.getLastName(),
-				addressBook.getAddress(), addressBook.getCity(), addressBook.getState(), addressBook.getZip(),
-				addressBook.getPhoneNumber(), addressBook.getEmail());
-		Mockito.when(mockAddressBookRepository.addContactToAddressBook(Mockito.any(AddressBook.class)))
-				.thenReturn(newAddressBook);
-		AddressBook result = mockAddressBookService.addContactToAddressBook(addressBook);
+		Contact contact = new Contact();
+		contact.setFirstName("leo");
+		contact.setLastName("Jack");
+		contact.setAddress("qatar");
+		contact.setCity("jaipur");
+		contact.setPhoneNumber("09877654");
+		contact.setState("rajasthan");
+		contact.setZip("123");
+		contact.setAddressBookId(1);
+		contact.setEmail("apc@123.com");
+		Contact newContact = new Contact(1, contact.getAddressBookId(), contact.getFirstName(), contact.getLastName(),
+				contact.getAddress(), contact.getCity(), contact.getState(), contact.getZip(), contact.getPhoneNumber(),
+				contact.getEmail());
+		Mockito.when(mockAddressBookRepository.addContactToAddressBook(Mockito.any(Contact.class)))
+				.thenReturn(newContact);
+		Contact result = mockAddressBookService.addContactToAddressBook(contact);
 		assertTrue(result.getId() == 1);
-		Mockito.verify(mockAddressBookRepository).addContactToAddressBook(Mockito.any(AddressBook.class));
+		Mockito.verify(mockAddressBookRepository).addContactToAddressBook(Mockito.any(Contact.class));
+	}
+
+	@Test
+	public void givenAddressBook_whenCalledDeleteByName_shouldDeleteContactInAddressBook() throws AddressBookException {
+		Mockito.when(mockAddressBookRepository.deleteContactByName(Mockito.anyString())).thenReturn(1);
+		int result = mockAddressBookService.deleteContactByName("leo");
+		assertTrue(result == 1);
+		Mockito.verify(mockAddressBookRepository).deleteContactByName(Mockito.anyString());
 	}
 }

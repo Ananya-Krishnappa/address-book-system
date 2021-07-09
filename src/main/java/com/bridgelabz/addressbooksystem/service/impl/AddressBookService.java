@@ -39,4 +39,17 @@ public class AddressBookService implements IAddressBookService {
 			throw new AddressBookException(e.getMessage());
 		}
 	}
+
+	/**
+	 * Function to delete contact by name
+	 */
+	@Override
+	public int deleteContactByName(String name) throws AddressBookException {
+		try {
+			int result = addressBookRepository.deleteContactByName(name);
+			return result;
+		} catch (Exception e) {
+			throw new AddressBookException(e.getMessage());
+		}
+	}
 }
