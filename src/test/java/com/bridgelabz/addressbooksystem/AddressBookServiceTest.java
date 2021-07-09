@@ -1,6 +1,13 @@
 package com.bridgelabz.addressbooksystem;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.bridgelabz.addressbooksystem.dao.AddressBookRepository;
 import com.bridgelabz.addressbooksystem.dto.Contact;
 import com.bridgelabz.addressbooksystem.exception.AddressBookException;
+import com.bridgelabz.addressbooksystem.exception.JdbcConnectorException;
 import com.bridgelabz.addressbooksystem.service.impl.AddressBookService;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,5 +68,65 @@ public class AddressBookServiceTest {
 		int result = mockAddressBookService.deleteContactByName("leo");
 		assertTrue(result == 1);
 		Mockito.verify(mockAddressBookRepository).deleteContactByName(Mockito.anyString());
+	}
+
+	@Test
+	public void givenMultipleContacts_whenCalledCreateContactInAddressBook_shouldDoBatchInserts()
+			throws AddressBookException, JdbcConnectorException, SQLException {
+		List<Contact> contactList = new ArrayList<Contact>();
+		Contact contact = createContact("goa", "Gurgoan", "983635242", "qwe@123.gmail.com", "Rocky", "Hari",
+				"Karnataka", "1267");
+		Contact contact1 = createContact("uyrg", "kerala", "9836399242", "kjhg@123.gmail.com", "Warner", "Kay",
+				"Kerala", "127");
+		contactList.add(contact);
+		contactList.add(contact1);
+
+		List<Contact> expectedContactList = new ArrayList<Contact>(contactList);
+		AtomicInteger index = new AtomicInteger();
+		expectedContactList.stream().map(c -> setIdToContact(c, index)).collect(Collectors.toList());
+		Mockito.when(mockAddressBookRepository.addMultipleContactsToAddressBook(Mockito.anyList()))
+				.thenReturn(expectedContactList);
+		List<Contact> actualContactList = mockAddressBookService.addMultipleContactsToAddressBook(contactList);
+		assertEquals(expectedContactList.size(), actualContactList.size());
+		Mockito.verify(mockAddressBookRepository).addMultipleContactsToAddressBook(Mockito.anyList());
+	}
+
+	/**
+	 * Function to create contact
+	 * 
+	 * @param address
+	 * @param city
+	 * @param phoneNum
+	 * @param email
+	 * @param firstName
+	 * @param lastName
+	 * @param state
+	 * @param zip
+	 * @return Contact
+	 */
+	private Contact createContact(String address, String city, String phoneNum, String email, String firstName,
+			String lastName, String state, String zip) {
+		Contact contact = new Contact();
+		contact.setAddress(address);
+		contact.setCity(city);
+		contact.setEmail(email);
+		contact.setFirstName(firstName);
+		contact.setLastName(lastName);
+		contact.setPhoneNumber(phoneNum);
+		contact.setState(state);
+		contact.setZip(zip);
+		return contact;
+	}
+
+	/**
+	 * Function to set id to contact
+	 * 
+	 * @param contact
+	 * @param index
+	 * @return Contact
+	 */
+	private Contact setIdToContact(Contact contact, AtomicInteger index) {
+		contact.setId(index.getAndIncrement());
+		return contact;
 	}
 }

@@ -2,10 +2,12 @@
  * Purpose:Address book JDBC connection
  * @author Ananya K
  * @version 1.0
- * @since 08/07/2021
+ * @since 09/07/2021
  * 
  */
 package com.bridgelabz.addressbooksystem.service.impl;
+
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,6 +50,19 @@ public class AddressBookService implements IAddressBookService {
 		try {
 			int result = addressBookRepository.deleteContactByName(name);
 			return result;
+		} catch (Exception e) {
+			throw new AddressBookException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Function to add multiple contacts to address book
+	 */
+	@Override
+	public List<Contact> addMultipleContactsToAddressBook(List<Contact> contactList) throws AddressBookException {
+		try {
+			List<Contact> newcontactList = addressBookRepository.addMultipleContactsToAddressBook(contactList);
+			return newcontactList;
 		} catch (Exception e) {
 			throw new AddressBookException(e.getMessage());
 		}
